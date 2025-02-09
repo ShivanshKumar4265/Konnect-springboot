@@ -22,5 +22,23 @@ public class UserRestImpl implements UserRest {
         }
     }
 
+    @Override
+    public ResponseEntity<Map<String, Object>> login(Map<String, String> requestMap) {
+        try {
+            return userService.logIn(requestMap);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Map<String, Object>> createRole(Map<String, String> requestMap) {
+        try {
+            return userService.logIn(requestMap);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
 

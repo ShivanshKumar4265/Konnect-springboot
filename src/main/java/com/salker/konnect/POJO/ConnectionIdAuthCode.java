@@ -3,6 +3,7 @@ package com.salker.konnect.POJO;
 import jakarta.persistence.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.validator.constraints.UniqueElements;
 
 import java.io.Serializable;
 
@@ -18,8 +19,9 @@ public class ConnectionIdAuthCode implements Serializable {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "user_id")
-    private String user_id;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = true, unique = true, foreignKey = @ForeignKey(name = "FK_USER_ID", value = ConstraintMode.CONSTRAINT))
+    private User user;
 
     @Column(name = "connection_id")
     private String connectionId;
@@ -41,12 +43,12 @@ public class ConnectionIdAuthCode implements Serializable {
         this.id = id;
     }
 
-    public String getUser_id() {
-        return user_id;
+    public User getUser() {
+        return user;
     }
 
-    public void setUser_id(String user_id) {
-        this.user_id = user_id;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getConnectionId() {
@@ -86,7 +88,6 @@ public class ConnectionIdAuthCode implements Serializable {
     public String toString() {
         return "ConnectionIdAuthCode{" +
                 "id=" + id +
-                ", user_id='" + user_id + '\'' +
                 ", connectionId='" + connectionId + '\'' +
                 ", authCode='" + authCode + '\'' +
                 ", created_at='" + created_at + '\'' +
