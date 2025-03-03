@@ -14,7 +14,6 @@ public interface UserRest {
     @PostMapping(path = "/getConnection")
     public ResponseEntity<Map<String, Object>> getConnection(@RequestBody(required = true) Map<String, String> requestMap);
 
-
     @PostMapping(path = "/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody(required = true) Map<String, String> requestMap);
 

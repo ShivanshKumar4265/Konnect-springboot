@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+
 @RestController
 public class UserRestImpl implements UserRest {
     @Autowired
@@ -34,7 +35,7 @@ public class UserRestImpl implements UserRest {
     @Override
     public ResponseEntity<Map<String, Object>> createRole(Map<String, String> requestMap) {
         try {
-            return userService.logIn(requestMap);
+            return userService.createRole(requestMap);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

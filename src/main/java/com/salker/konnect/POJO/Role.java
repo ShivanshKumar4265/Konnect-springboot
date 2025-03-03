@@ -20,7 +20,6 @@ public class Role implements Serializable {
     @Column(name = "role")
     private String role;
 
-
     @Column(name = "status")
     private String status;
 

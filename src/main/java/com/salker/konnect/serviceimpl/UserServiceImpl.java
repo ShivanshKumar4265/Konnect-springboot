@@ -1,8 +1,10 @@
 package com.salker.konnect.serviceimpl;
 
 import com.salker.konnect.POJO.ConnectionIdAuthCode;
+import com.salker.konnect.POJO.Role;
 import com.salker.konnect.POJO.User;
 import com.salker.konnect.dao.AuthDao;
+import com.salker.konnect.dao.RoleDao;
 import com.salker.konnect.dao.UserDao;
 import com.salker.konnect.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,10 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     UserDao userDao;
+
+
+    @Autowired
+    RoleDao roleDao;
 
     @Override
     public ResponseEntity<Map<String, Object>> getConnection(Map<String, String> requestMap) {
@@ -129,7 +135,80 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public ResponseEntity<Map<String, Object>> createRole(Map<String, String> requestMap) {
 
+        // Check if required fields are present
+        if (!requestMap.containsKey("connection_id") || !requestMap.containsKey("auth_code") || !requestMap.containsKey("role_name")) {
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("status", "failure");
+            response.put("message", "Missing required fields: connection_id, auth_code, or role_name.");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
+        // Retrieve ConnectionIdAuthCode based on connection_id and auth_code
+        ConnectionIdAuthCode connectionIdAuthCode = authDao.findByConnectionIdAndAuthCode(requestMap.get("connection_id"), requestMap.get("auth_code"));
+
+        if (connectionIdAuthCode == null) {
+            return createResponse("failure", "Invalid connection id.", null, HttpStatus.OK);
+        } else if (!requestMap.get("connection_id").equalsIgnoreCase(connectionIdAuthCode.getConnectionId())) {
+            return createResponse("failure", "Invalid connection id.", null, HttpStatus.OK);
+        } else if (!requestMap.get("auth_code").equalsIgnoreCase(connectionIdAuthCode.getAuthCode())) {
+            return createResponse("failure", "Invalid authentication code.", null, HttpStatus.OK);
+        }
+
+        // Check user role and allow or deny creation based on role
+        if (!connectionIdAuthCode.getUser().getRole().getRole().equalsIgnoreCase("super_admin")) {
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("status", "failure");
+            response.put("message", "Prohibited to create role!!");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else if (requestMap.get("role_name") == null || requestMap.get("role_name").isEmpty()) {
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("status", "failure");
+            response.put("message", "Role name is required.");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else if (roleDao.findByRole(requestMap.get("role_name").toLowerCase()) != null) {
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("status", "failure");
+            response.put("message", "Role already exists.");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            // Create new role and set the attributes
+            Role role = new Role();
+            role.setRole(requestMap.get("role_name").toLowerCase());
+
+            // Set the current time for created_at and updated_at
+            String currentTime = String.valueOf(new Date());
+            role.setCreated_at(currentTime);
+            role.setUpdated_at(currentTime);
+            role.setStatus("active");
+
+            try {
+                // Save the role to the database
+                role = roleDao.save(role);
+
+                // Check if the role is saved and respond accordingly
+                if (role != null) {
+                    Map<String, Object> response = new LinkedHashMap<>();
+                    response.put("status", "success");
+                    response.put("message", "Role has been created successfully.");
+                    return new ResponseEntity<>(response, HttpStatus.OK);
+                } else {
+                    Map<String, Object> response = new LinkedHashMap<>();
+                    response.put("status", "failure");
+                    response.put("message", "Failed to create role.");
+                    return new ResponseEntity<>(response, HttpStatus.OK);
+                }
+            } catch (Exception e) {
+                // Handle potential exceptions during the save process
+                Map<String, Object> response = new LinkedHashMap<>();
+                response.put("status", "failure");
+                response.put("message", "An error occurred while creating the role: " + e.getMessage());
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+        }
+    }
 
 
     // Method to generate random numeric code
