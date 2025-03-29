@@ -23,7 +23,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     UserDao userDao;
 
-
     @Autowired
     RoleDao roleDao;
 
@@ -225,7 +224,7 @@ public class UserServiceImpl implements UserService {
     private String generateRandomAuthCode(int length) {
         Random random = new Random();
         StringBuilder code = new StringBuilder();
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; // The character set
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXY!Zabcdefghijklmnopqrstuvwxyz0123456789,#$%&'()*+,-./:;<=>?@[]^_`{|}~"; // The character set
 
         for (int i = 0; i < length; i++) {
             int randomIndex = random.nextInt(characters.length()); // Generate a random index in the character set
